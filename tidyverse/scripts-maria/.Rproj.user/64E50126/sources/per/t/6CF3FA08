@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1577893265189.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1449161024",
+    "id" : "6CF3FA08",
+    "lastKnownWriteTime" : 1578072179,
+    "last_content_update" : 1578072179498,
+    "path" : "~/Developer/Cursos Udemy Alumna/tidyverse/scripts-maria/15-model-basics.R",
+    "project_path" : "15-model-basics.R",
+    "properties" : {
+        "cursorPosition" : "253,0",
+        "notebook_format" : "html_document",
+        "scrollLine" : "231"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

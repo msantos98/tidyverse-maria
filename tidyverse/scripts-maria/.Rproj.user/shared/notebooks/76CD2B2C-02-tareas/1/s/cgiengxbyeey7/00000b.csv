@@ -1,0 +1,6 @@
+"0","cancelled <- flights %>%
+  fliter(is.na(air_time))
+"
+"2","Error in fliter(., is.na(air_time)) : 
+  no se pudo encontrar la función ""fliter""
+"

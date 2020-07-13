@@ -1,0 +1,1702 @@
+---
+title: "Transformación de datos"
+author: "María Santos"
+date: "2/10/2019"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 1
+    theme: cerulean
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+# themes que me gustan: cerulean, flatly, cosmo
+knitr::opts_chunk$set(echo = TRUE, comment = NA, cache = T)
+library(tidyverse)
+library(nycflights13)
+```
+
+# Tarea 1
+
+## Ejercicio 1
+
+Si ejecutas ggplot(data = mpg), ¿qué observas?
+
+### Solución 
+
+Solamente observo un recuadro gris. Esto se debe a que únicamente crea esa malla vacía donde luego irán el resto de capas que introduzcamos tras los signos +.
+
+## Ejercicio 2
+
+Indica el número de filas que tiene el data frame mpg. ¿Qué significa cada fila?
+
+### Solución 
+
+```{r}
+dim(mpg)[1]
+```
+
+
+Tiene 234 filas. Cada fila es una observación. En nuestro caso, cada fila es un coche.
+
+## Ejercicio 3
+
+Indica el número de columnas que tiene el data frame mpg. ¿Qué significa cada columna?
+
+### Solución
+
+```{r}
+dim(mpg)[2]
+```
+
+Hay 11 columnas. Cada columna es una variable.
+
+## Ejercicio 4
+
+Observa la variable drv del data frame. ¿Qué describe? Recuerda que puedes usar la instrucción ?mpg para consultarlo directamente en R.
+
+## Solución 
+
+Es una variable categórica que indica el tipo de tracción del coche.
+
+## Ejercicio 5
+
+Realiza un scatterplot de la variable hwy vs cyl. ¿Qué observas?
+
+### Solución
+
+```{r}
+ggplot(mpg) +
+  geom_point(aes(hwy, cyl))
+```
+Una cosa extraña. Todos los puntos se encuentran repartidos entre 4 rectas (en mi caso horizontales porque mi eje x es hwy y el y es cyl). Esto se debe a que la segunda variable, cyl, es una variable categórica que tiene en total 4 categorías (que hacen referencia a la cilidrada).
+
+Aparte, me atrevería a decir que observo una tendencia decreciente. Es decir, que cuántas más millas por galón por autopista recorre el coche, menos cilindrada tiene (cosa que se corresponde un poco con lo visto en teoría sobre que cuánto más potente es el motor menos millas por galón recorre)
+
+## Ejercicio 6
+
+Realiza un scatterplot de la variable cty vs cyl. ¿Qué observas?
+
+### Solución
+
+```{r}
+ggplot(mpg) + 
+  geom_point(aes(cty, cyl))
+```
+
+Observo algo muy similar al caso anterior. De nuevo se debe a que la variable cyl es una variable categórica.
+
+Sin embargo, en este caso lo que se observa es que cuanto más millas en ciudad por galón   (eso indica la variable cty) recorre el coche, menos cilindrada tiene.
+
+## Ejercicio 7
+
+Realiza un scatterplot de la variable class vs drv. ¿Qué observas? ¿Es útil este diagrama? ¿Por qué?
+
+### Solución
+
+```{r}
+ggplot(mpg) +
+  geom_point(aes(class, drv))
+```
+
+Observo una nube de puntos que me indica qué tipo de tracción tienen los distintos coches.  Puedo observar que algunos solamente tienen un tipo de tracción, como por ejemplo  el llamado "pickup", que solo tiene tracción en las 4 ruedas; otros tipos de coche ofrecen todos los tipos de tracción como los "subcompact". Esto no quiere decir que un coche tenga los 3 tipos de tracción, sino que habrá distintos modelos de la misma clase de coche que tengan cada uno un tipo de tracción diferente. Por último, también podemos observar que la mayoría de clases de coche tienen solamente 2 tipos de tracción, como por ejemplo los "suv".
+
+La utilidad depende de lo que estemos estudiando o intentando responder. En nuestro caso, que intentamos estudiar la relación entre la potencia del motor y la cantidad de combustible que consumen no nos es del todo útil. Por otro lado, el gráfico no da mucha más información de la comentada anteriormente, pero eso no quiere decir que no sea útil para alguien que investigue los diferentes tipos de tracción.
+
+
+
+
+
+***
+
+# Tarea 2
+
+## Ejercicio 1
+
+Toma el siguiente fragmento de código y di qué está mal. ¿Por qué no aparecen pintados los puntos de color verde?
+
+```{r, eval = F}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, color = "green"))
+```
+  
+### Solución
+
+Porque el parámetro color = "green" debería estar fuera de la estética.
+
+El código correcto sería
+
+```{r}
+ggplot(data = mpg) +
+ geom_point(mapping = aes(x = displ, y = hwy), color = "green")
+```
+
+## Ejercicio 2
+
+Toma el dataset de mpg anterior y di qué variables son categóricas.
+
+### Solución
+
+Las variables categóricas del dataset mpg son
+
+- manufacturer
+- model
+- year
+- cyl
+- trans
+- drv
+- fl
+- class
+
+## Ejercicio 3
+
+Toma el dataset de mpg anterior y di qué variables son contínuas.
+
+### Solución
+
+Las variables continuas son
+
+- displ
+- cty
+- hwy
+
+## Ejercicio 4
+
+Dibuja las variables contínuas con color, tamaño y forma respectivamente.
+
+### Solución
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = cty, color = displ ))
+
+ggplot(data= mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, size = cty))
+
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = cty), shape = 22)
+```
+
+No podemos hacer que la forma sea en función de `hwy`, pues como mucho admite 6 a la vez.
+
+## Ejercicio 5
+
+¿En qué se diferencian las estéticas para variables contínuas y categóricas?
+
+### Solución 
+
+En que utilizando las variables categóricas hay un número finito de colores, tamaños o formas, mientras que si utilizamos funciones continuas, se nos crea una paleta de colores con degradados, ya que necesitamos de muchos más que en el otro caso.
+
+## Ejercicio 6
+
+¿Qué ocurre si haces un mapeo de la misma variable a múltiples estéticas?
+
+### Solución
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, size = cty, color = cty))
+```
+
+Ocurre que se combinan los mappings.
+
+
+## Ejercicio 7
+
+Vamos a conocer una estética nueva llamada stroke. ¿Qué hace? ¿Con qué formas funciona bien? 
+
+### Solución
+
+Para empezar, no funciona con variables categóricas. Solamente funciona con continuas. Los puntos son de diferentes tamaños, pero son gigantes.
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, stroke = cty, color = cty))
+```
+
+
+Según la ayuda de R, "Multiply size in mm by these constants in order to convert to the units that grid uses internally for lwd and fontsize." O también, "For shapes that have a border (like 21), you can colour the inside and outside separately. Use the stroke aesthetic to modify the width of the border"
+
+```{r}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point(shape = 21, colour = "black", fill = "white", size = 5, stroke = 5)
+```
+
+
+## Ejercicio 8
+
+¿Qué ocurre si haces un mapeo de una estética a algo que no sea directamente el nombre de una variable (por ejemplo aes(color = displ < 4))?
+
+### Solución
+
+Que hay dos colores: el que cumple la condición y el que no. Es decir, el color pasa a ser una nueva clasificación con solamente dos clases.
+
+```{r}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point(aes(color = displ < 4))
+```
+
+
+
+
+
+***
+
+# Tarea 3
+
+## Ejercicio 1
+
+¿Qué ocurre si hacemos un facet de una variable contínua?
+
+### Solución
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = cty, y = hwy)) +
+  facet_wrap(~displ, nrow = 2)
+```
+
+Pues que se crea un gráfico por cada valor de la variable continua, cosa que no tiene ningún sentido pues no aporta información.
+
+
+## Ejercicio 2
+
+¿Qué significa si alguna celda queda vacía en el gráfico facet_grid(drv~cyl)?
+
+¿Qué relación guardan esos huecos vacíos con el gráfico siguiente?
+
+```{r, eval = F}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x=drv, y = cyl)) 
+```
+
+  
+### Solución
+  
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = cty, y = hwy)) +
+  facet_grid(drv~cyl)
+```
+
+Pues que, por ejemplo, no hay ninguna variable con `cyl` igual a `r` y que además tenga `drv` igual a 4. Es decir, si alguna celda está vacía es que el cruce entre ambos niveles del factor no se da.
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x=drv, y = cyl)) 
+```
+
+Los huecos vacíos que había en el primer plot de este ejercicio se corresponden con las intersecciones no destacadas con un punto. De hecho, la fila 7 no tiene ningún punto en ninguna de sus intersecciones con los niveles de `drv` y directamente la columna 7 ni siquiera aparece en el primero de los gráficos. Por lo visto `R` suprime las filas o columnas cuyas celdas son todas vacías.
+
+
+## Ejercicio 3
+
+¿Qué gráficos generan las siguientes dos instrucciones? ¿Qué hace el punto? ¿Qué diferencias hay de escribir la variable antes o después de la virgula?
+
+```{r, eval = F}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x=displ, y = hwy)) +
+  facet_grid(.~cyl)
+
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x=displ, y = hwy)) +
+  facet_grid(drv~.)
+```
+
+### Solución
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x=displ, y = hwy)) +
+  facet_grid(.~cyl)
+
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x=displ, y = hwy)) +
+  facet_grid(drv~.)
+```
+
+Se genera el plot `displ` vs `hwy` y además se muestran en 3 gráficos (uno por cada nivel del factor `drv`). El punto indica que no se considera ninguna variable como fila, en caso de que esté a la izquierda de la vírgula, o como columna, en caso de estar a la derecha.
+
+El papel de la vírgula es separar la variable que irá en las filas (la que esté a su izquierda) y la que irá en las columnas (la que está a su derecha). Y como hay un punto, solamente se muestra en columnas (en el caso del primer gráfico) o en filas (en el caso del segundo).
+
+Dato curioso: el primer gráfico se ejecutará independientemente de si indiquemos punto a la izquierda de la vírgula o no. Es el único caso en el que ocurre
+
+
+## Ejercicio 4
+
+El primer facet que hemos pintado era el siguiente:
+
+```{r, eval = F}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_wrap(~class, nrow = 3)
+```
+
+¿Qué ventajas crees que tiene usar facets en lugar de la estética del color? ¿Qué desventajas? ¿Qué cambiaría si tu dataset fuera mucho más grande?
+
+### Solución
+
+Los facets tienen la ventaja de que permiten estudiar por separado los puntos representados en función de cada nivel de la variable categórica que hayamos utilizado. La mayor desventaja que le veo es que se pierde la visión global que aportaría utilizar el color en vez de las facetas. Si mi dataset fuera mucho más grande, probablemente utilizaría facets, pues a lo mejor los colores se mezclarían demasiado como para poder distinguir nada.
+
+## Ejercicio 5
+
+Investiga la documentación de ?facet_wrap y contesta a las siguientes preguntas:
+
+¿Qué hace el parámetro nrow?
+¿Y el parámetro ncol?
+¿Qué otras opciones sirven para controlar el layout de los paneles individuales?
+¿Por qué facet_grid() no tiene los parámetros de nrow ni de ncol?
+
+### Solución
+
+nrow: Indica el número de filas en que queremos distribuídas las facetas (cuando las categorías están en las columnas)
+
+ncol: Indica el número de filas en que queremos distribuídas las facetas (cuando las categorías están en las filas)
+
+Otras opciones son switch, drop, strip.position...
+
+Porque no tiene sentido, pues los niveles de cada variable indican las filas y las columnas
+
+## Ejercicio 6
+
+Razona la siguiente afirmación:
+
+Cuando representemos un facet con facet_grid() conviene poner la variable con más niveles únicos en las columnas.
+
+### Solución
+
+Cierto, pues como se dijo antes, el número de filas y columnas viene determinado por la cantidad de niveles únicos de cada variable. Si ponemos la que más niveles tiene en las columnas, el plot nos quedará menos incomprensible, pues suelen ser siempre más anchos que altos.
+
+
+
+
+
+***
+
+# Tarea 4
+
+## Ejercicio 1
+
+Ejecuta este código en tu cabeza y predice el resultado. Luego ejecutalo en R y comprueba tu hipótesis:
+
+```{r, eval = F}
+ggplot(data = mpg, mapping = aes(x=displ, y = hwy,color = drv)) + 
+  geom_point() + 
+  geom_smooth(se = F)
+```
+
+### Solución 
+
+En el eje de las x, tendremos la variable displ (desplazamiento) del dataset mpg y en el eje vertical, la variable hwy (millas por autopista). El color vendrá dado por la variable categórica drv, que era el tipo de tracción del coche.
+
+Se mostrará un scatterplot junto con una curva sin corredor.
+
+```{r}
+ggplot(data = mpg, mapping = aes(x=displ, y = hwy,color = drv)) + 
+  geom_point() + 
+  geom_smooth(se = F)
+```
+
+
+## Ejercicio 2
+
+¿Qué hace el parámetro show.legend = F? ¿Qué pasa si lo eliminamos? ¿Cuando lo añadirías y cuando lo quitarías?
+
+### Solución
+
+Hace que la leyenda, si la hay, no se muestre.
+
+Pues que la leyenda, si la hay, se mostrará porque su valor por defecto es TRUE
+
+Lo añadiría cuando fuese necesaria la aclaración de colores o formas y lo quitaría cuando solamente hubiese un elemento en la leyenda o cuando la aclaración no fuese para nada necesaria.
+
+## Ejercicio 3
+
+¿Qué hace el parámetro se de la función geom_smooth()? ¿Qué pasa si lo eliminamos? ¿Cuando lo añadirías y cuando lo quitarías?
+
+### Solución
+
+gualado a TRUE (su valor por defecto) muestra el corredor, que representa un intervalo de confianza. Igualado a FALSE, omite dicho corredor.
+
+## Ejercicio 4
+
+Describe qué hacen los dos siguientes gráficos y di si serán igual y diferente. Justifica tu respuesta.
+
+```{r, eval = F}
+ggplot(data = mpg, mapping = aes(x=displ, y = hwy)) + 
+  geom_point() + 
+  geom_smooth()
+
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x=displ, y = hwy)) + 
+  geom_smooth(mapping = aes(x=displ, y = hwy))
+```
+
+### Solución 
+
+```{r}
+ggplot(data = mpg, mapping = aes(x=displ, y = hwy)) + 
+  geom_point() + 
+  geom_smooth()
+
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x=displ, y = hwy)) + 
+  geom_smooth(mapping = aes(x=displ, y = hwy))
+```
+
+El primer gráfico muestra, en el eje de las x, la variable displ (desplazamiento) del dataset mpg y en el eje vertical, la variable hwy (millas por autopista). La estética es global. Lo muestra como scatterplot junto con una curva con corredor.
+
+El segundo gráfico mostrará exactamente lo mismo, a pesar de que las estéticas en este caso sean locales. De todas formas, se utiliza la misma estética en ambas geometrías, con lo cuál no habrá ninguna variación con respecto al primer gráfico.
+
+## Ejercicio 5
+
+Reproduce el código de R que te genera el siguiente gráfico.
+
+### Solución 
+
+```{r}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point() +
+  geom_smooth(se = F)
+```
+
+
+## Ejercicio 6
+
+Reproduce el código de R que te genera el siguiente gráfico.
+
+### Solución
+
+```{r}
+ggplot(mpg, aes(displ, hwy, group = drv)) +
+  geom_point() +
+  geom_smooth(se = F)
+```
+
+## Ejercicio 7
+
+Reproduce el código de R que te genera el siguiente gráfico.
+
+### Solución 
+
+```{r}
+ggplot(mpg, aes(displ, hwy, col = drv)) +
+  geom_point() +
+  geom_smooth(se = F)
+```
+
+## Ejercicio 8
+
+Reproduce el código de R que te genera el siguiente gráfico.
+
+### Solución 
+
+```{r}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point(aes(col = drv, shape = drv)) +
+  geom_smooth(se = F)
+```
+
+## Ejercicio 9
+
+Reproduce el código de R que te genera el siguiente gráfico.
+
+### Solución 
+
+```{r}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point(aes(col = drv, shape = drv)) +
+  geom_smooth(aes(linetype = drv), se = F)
+```
+
+## Ejercicio 10
+
+¡Este va para nota!
+
+Reproduce el código de R que te genera el siguiente gráfico. Investiga algunos parámetros adicionales que te harán falta de ggplot2 como stroke entre otros.
+
+### Solución 
+
+```{r}
+ggplot(data = mpg, mapping = aes(x=displ, y = hwy, fill = drv)) + 
+     geom_point(pch = 23, size = 4, color = "white", stroke = 2)
+```
+
+
+
+
+
+***
+
+# Tarea 5
+
+## Ejercicio 1
+
+¿Qué hace el parámetro geom_col? ¿En qué se diferencia de geom_bar?
+
+### Solución
+
+geom_col hace un diagrama de barras la altura de las cuales representa el valor de los datos. Lo que cambia con respecto a geom_bar es precisamente eso. las alturas de las barras con geom_bar son proporcionales al número de casos en cada grupo o a los pesos.
+
+## Ejercicio 2
+
+La gran mayoría de geometrías y de stats vienen por parejas que siempre se utilizan en conjunto. Por ejemplo geom_bar con stats_count. Haz una pasada por la documentación y la chuleta de ggplot y establece una relación entre esas parejas de funciones. ¿Qué tienen todas en común?
+
+### Solución
+
+geom_boxplot va con stat_boxplot()
+
+geom_smooth va con stat_smooth()
+
+Por lo general, se tiene stat_X() va con geom_X() y ambas funciones hacen exactamente lo mismo ya que tienen prácticamente los mismos parámetros.
+
+## Ejercicio 3
+
+¿Qué variables calcula la función stat_smooth? ¿Qué parámetros controlan su comportamiento?
+
+### Solución
+
+Las variables son
+
+- y: predicted value
+- ymin: lower pointwise confidence interval around the mean
+- ymax: upper pointwise confidence interval around the mean
+- se: standard error
+
+y los parámetros
+
+- mapping
+- data
+- position
+- method
+- formula
+- se
+- etc
+
+## Ejercicio 4
+
+Cuando hemos pintado nuestro diagrama de barras con sus proporciones, necesitamos configurar el parámetro group = 1. ¿Por qué?
+
+### Solución
+
+Porque si no lo ponemos todas las alturas son iguales. Además, este parámetro sirve para indicar la suma de todas las filas tiene que ser 1 y que agrupamos por filas, agrupando las x.
+
+## Ejercicio 5
+
+¿Qué problema tienen los dos siguientes gráficos?
+
+```{r, eval = F}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, y = ..prop..))
+
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, fill = color, y = ..prop..))
+```
+
+  
+### Solución
+
+Pues que les falta el parámetro group = 1, cuyo problema se trata en el ejercicio 4 de esta misma tarea
+
+```{r}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, y = ..prop.., group = 1))
+
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, fill = color, y = ..prop.., group = color))
+```
+
+
+
+
+
+***
+
+# Tarea 6
+
+## Ejercicio 1
+
+El siguiente gráfico que genera el código de R es correcto pero puede mejorarse. ¿Qué cosas añadirías para mejorarlo?
+
+```{r, eval = F}
+ggplot(data = mpg, mapping = aes(x = cty, y = hwy )) + 
+  geom_point()
+```
+
+### Solución
+
+Añadiría alguna agrupación por colores, un título... que el gráfico proporcionado es muy soso y da poca información. Podría ser más llamativo y dar más infomación sobre los coches. Todo depende de lo que estemos buscando.
+
+## Ejercicio 2
+
+Investiga la documentación de geom_jitter(). ¿Qué parámetros controlan la cantidad de ruído aleatorio (jitter)?
+
+### Solución
+
+Añade una pequeña cantidad de ruido aleatorio para evitar el overplotting
+
+El parámetro width es el que controla la cantidad de ruido vertical y horizontal
+
+## Ejercicio 3
+
+Compara las funciones geom_jitter contra geom_count y busca semejanzas y diferencias entre ambas.
+
+### Solución
+
+geom_count cuenta el número de observaciones en cada localización y luego en base a ese conteo, aumenta el tamaño de los puntos, pero geom_jitter lo que hace es añadir ruido aleatorio para que desaparezca el posible overlapping.
+
+Básicamente, ambos evitan el posible overlapping pero lo hacen de formas diferentes.
+
+## Ejercicio 4
+
+¿Cuál es el valor por defecto del parámetro position de un geom_boxplot? Usa el dataset de diamonds o de mpg para hacer una visualización que lo demuestre.
+
+### Solución
+
+position = "dodge2"
+
+```{r}
+ggplot(data = mpg, mapping = aes(x = class, y = hwy)) + 
+    geom_boxplot() 
+
+
+ggplot(data = mpg, mapping = aes(x = class, y = hwy)) +
+    geom_boxplot(position = "dodge2") 
+```
+
+Los dos gráficos son exactamente iguales.
+
+
+## Ejercicio 5
+
+Convierte un diagrama de barras apilado en un diagrama de sectores o de tarta usando la función coord_polar()
+
+### Solución 
+
+```{r}
+ggplot(data = diamonds, mapping = aes(x = cut, fill = clarity)) + 
+    geom_bar(position = "fill") + 
+    coord_polar()
+```
+
+
+## Ejercicio 6
+
+¿Qué hace la función labs()? Lee la documentación y explícalo correctamente.
+
+### Solución
+
+Según los parámetros que utilicemos, añade título, subtítulo, caption, etiquetas a los ejes o etiquetas.
+
+## Ejercicio 7
+
+¿En qué se diferencian las funciones coord_quickmap() y coord_map()?
+
+### Solución
+
+coord_map proyecta una porción de la tierra aproximadamente esférica en un plano. No preserva las líneas rectas.
+
+coord_quickmap lo que hace es una rápida aproximación que conserva las líneas rectas. Funciona mejor para las zonas pequeñas cercanas al ecuador.
+
+## Ejercicio 8
+
+Investiga las coordenadas coord_fixed() e indica su función.
+
+### Solución
+
+A fixed scale coordinate system forces a specified ratio between the physical representation of data units on the axes. The ratio represents the number of units on the y-axis equivalent to one unit on the x-axis.
+
+## Ejercicio 9
+
+Investiga la geometría de la función geom_abline(), geom_vline() y geom_hline() e indica su función respectivamente.
+
+### Solución
+
+geom_vline() dibuja rectas verticales.
+
+geom_hline() dibuja rectas horizontales.
+
+geom_abline() dibuja rectas diagonales, verticales u horizontales según los parámetros que utilicemos.
+
+## Ejercicio 10
+
+¿Qué nos indica el gráfico siguiente acerca de la relación entre el consumo en ciudad y en autopista del dataset de mpg?
+
+```{r, eval = F}
+ggplot(data = mpg, mapping = aes(x = cty, y = hwy )) + 
+  geom_point() + 
+  geom_abline() + 
+  coord_fixed()
+```
+
+### Solución
+
+```{r}
+ggplot(data = mpg, mapping = aes(x = cty, y = hwy )) + 
+  geom_point() + 
+  geom_abline() + 
+  coord_fixed()
+```
+
+Para empezar representa los puntos donde el eje de las x es la variable cty mientras que el eje de las y es la variable hwy. Las coordenadas no sufren ninguna modificación ya que ratio = 1 por defecto.
+
+Lo último dibujado es la recta diagonal y = x.
+
+En definitiva, este gráfico no nos dice nada de la relación entre ambas variables, excepto que podemos observar una tendencia positiva
+
+
+
+
+
+***
+
+# Tarea 7
+
+## Ejercicio 1
+
+¿Por qué no funciona el siguiente código?
+
+```{r, eval = F}
+my_variable <- 5
+
+my.variable
+```
+
+### Solución
+
+Porque defines la variable my_variable, pero luego llamas a la variable my.variable, que no existe porque la que has definido está en modo snake, mientras que la que llamas tiene por separación puntos
+
+## Ejercicio 2
+
+¿Por qué no funciona el siguiente código?
+
+```{r, eval = F}
+my_variable <- 5
+
+my_varIable
+```
+
+## Solución
+
+Porque defines la variable my_variable, pero luego llamas a la variable my_varIable, que no tiene nada que ver pues la i mayúscula hace que la variable a la que llamas sea otra completamente diferente.
+
+## Ejercicio 3
+
+¿Por qué no funciona el siguiente código?
+
+```{r, eval = F}
+my_variable <- 5
+
+my_var1able
+```
+
+### Solución
+
+Porque defines una variable y, como en los dos casos anteriores, estás llamando a otra muy diferente. En este caso, has cambiado la i por un 1.
+
+## Ejercicio 4
+
+¿Por qué no funciona el siguiente código?
+
+```{r, eval = F}
+my_variable -> 5
+
+my_variable
+```
+
+### Solución
+
+Porque en este caso has girado la dirección de asignación. Para que el código funcione correctamente, deberías introducir lo siguiente
+
+```{r, eval = F}
+my_variable <- 5
+my_variable
+```
+
+## Ejercicio 5
+
+Las siguientes líneas pueden tener algun error de escritura. Localízalo y corrígelo para que funcione correctamente.
+
+```{r, eval = F}
+librari(tidyverse)
+ggplot(dati = mpg) + geom_puint(mapping = aes(x = displ, y = hwy))
+fliter(mpg, cyl=6)
+filter(diamond, caret > 4)
+```
+
+### Solución
+
+El código correcto es el que se muestra a continuación
+
+```{r, eval = F}
+library(tidyverse)
+ 
+ggplot(data = mpg) + 
+    geom_point(mapping = aes(x = displ, y = hwy))
+ 
+filter(mpg, cyl = 6)
+ 
+filter(diamonds, carat > 4)
+```
+
+## Ejercicio 6
+
+Vamos a por un poco de magia oscura. Prueba la combinación Alt + Shift + K. ¿Qué hace? ¿Útil eh?
+
+### Solución 
+
+Te muestra los shortcuts de Rstudio. Y tanto que es útil :D
+
+
+
+
+
+***
+
+# Tarea 8
+
+## Ejercicio 1
+
+Encuentra todos los vuelos que llegaron más de una hora tarde de lo previsto.
+
+### Solución
+
+```{r}
+delay_morethan_hour <- flights %>%
+  filter(arr_delay > 60) %>%
+  arrange(arr_delay)
+```
+
+## Ejercicio 2
+
+Encuentra todos los vuelos que volaron hacia San Francisco (aeropuertos SFO y OAK)
+
+### Solución
+
+```{r}
+flights_SF <- flights %>%
+  filter(dest %in% c("SFO","OAK"))
+```
+
+## Ejercicio 3
+
+Encuentra todos los vuelos operados por United American (UA) o por American Airlines (AA)
+
+### Solución
+
+```{r}
+flights_american <- flights %>%
+  filter(carrier %in% c("UA", "AA"))
+```
+
+## Ejercicio 4
+
+Encuentra todos los vuelos que salieron los meses de primavera (Abril, Mayo y Junio)
+
+### Solución
+
+```{r}
+flights_spring <- flights %>%
+  filter(month %in% c(4,5,6))
+```
+
+## Ejercicio 5
+
+Encuentra todos los vuelos que llegaron más de una hora tarde pero salieron con menos de una hora de retraso.
+
+### Solución
+
+```{r}
+flights_delay <- flights %>%
+  filter(arr_delay > 60, dep_delay < 60)
+```
+
+## Ejercicio  6
+
+Encuentra todos los vuelos que salieron con más de una hora de retraso pero consiguieron llegar con menos de 30 minutos de retraso (el avión aceleró en el aire)
+
+### Solución
+
+```{r}
+flights_no_delay <- flights %>%
+  filter(dep_delay > 60, arr_delay < 30)
+```
+
+## Ejercicio 7
+
+Encuentra todos los vuelos que salen entre medianoche y las 7 de la mañana (vuelos nocturnos).
+
+### Solución
+
+```{r}
+flights_night <- flights %>%
+  filter(dep_time %in% c(0:700))
+
+flights_night2 <- flights %>%
+  filter(dep_time >= 0, dep_time <= 700)
+```
+
+
+## Ejercicio 8
+
+Investiga el uso de la función between() de dplyr. ¿Qué hace? Puedes usarlo para resolver la sintaxis necesaria para responder alguna de las preguntas anteriores?
+
+### Solución
+
+La función es un shortcut para indicar si un valor pertenece a un intervalo cerrado (a <= x <= b o bien x in [a,b]) donde a y b son los extremos del intervalo y x es el valor.
+
+Podemos utilizarla para resolver el ejercicio 7, entre otros cuantos.
+
+```{r}
+flights_night <- flights %>%
+  filter(between(dep_time, 0, 700))
+```
+
+## Ejercicio 9
+
+¿Cuántos vuelos tienen un valor desconocido de dep_time?
+
+### Solución
+
+```{r}
+flights %>%
+  filter(is.na(dep_time)) %>%
+  count()
+```
+
+8255 vuelos tienen un valor desconocido de dep_time.
+
+
+## Ejercicio 10
+
+¿Qué variables del dataset contienen valores desconocidos? ¿Qué representan esas filas donde faltan los datos?
+
+### Solución
+
+Las variables dep_time, dep_delay, arr_time, arr_delay, tailnum y air_time contienen valores desconocidos.
+
+Las filas donde faltan datos representan vuelos cancelados, porque lo que sobre todo falta es lo que tiene que ver con tiempo de salida / llegada o retraso de salida / llegada. No obstante, también hay filas donde falta el número de cola, que puede deberse a múltiples razones como la anterior o como que se escribió mal o se les pasó introducir el dato.
+
+
+## Ejercicio 11
+
+Ahora vas a sorprenderte con la magia oscura... Contesta que dan las siguientes condiciones booleanas
+
+NA^0
+NA|TRUE
+FALSE&NA
+
+Intenta establecer la regla general para saber cuando es o no es NA (cuidado con NA*0)
+
+### Solución
+
+```{r}
+NA^0
+NA | TRUE
+FALSE & NA
+typeof(NA)
+
+```
+
+La primera instrucción da 1. En este caso NA es considerado un valor numérico ya que cualquier número elevado a 0 da 1.
+
+En los siguientes casos se aplican las reglas lógicas. Cualquier cosa ó TRUE siempre es verdad (TRUE), mientras que cualquier cosa y FALSE siempre es falso (FALSE).
+
+Creo que la regla está en cuando queda en duda si puede ser número o no. En los ejemplos anteriores, sea cual sea el valor (ya sea NA o cualquier otra cosa), no hay duda en cuál será el resultado.
+
+El resultado `NA*0` puede ser debido a que `NA` es de tipo lógico y `R` no sabe como actuar.
+
+
+
+
+
+***
+
+# Tarea 9
+
+## Ejercicio 1
+
+Piensa cómo podrías usar la función arrange() para colocar todos los valores NA al inicio. Pista: puedes la función is.na() en lugar de la función desc() como argumento de arrange.
+
+### Solución
+
+```{r}
+flights %>%
+  arrange(!is.na(dep_time))
+```
+
+
+## Ejercicio 2
+
+Ordena los vuelos de flights para encontrar los vuelos más retrasados en la salida. ¿Qué vuelos fueron los que salieron los primeros antes de lo previsto?
+
+### Solución
+
+```{r}
+flights %>%
+  arrange(desc(dep_delay))
+
+flights %>%
+  filter(dep_delay <= 0) %>% 
+  arrange(dep_delay)
+```
+
+
+## Ejercicio 3
+
+Ordena los vuelos de flights para encontrar los vuelos más rápidos. Usa el concepto de rapidez que consideres. 
+
+### Solución
+
+Mi concepto de velocidad es distancia entre tiempo, por tanto
+
+```{r}
+flights %>%
+  arrange(desc(distance/air_time))
+```
+
+
+
+## Ejercicio 4
+
+¿Qué vuelos tienen los trayectos más largos? Busca en Wikipedia qué dos aeropuertos del dataset alojan los vuelos más largos. 
+
+### Solución
+
+Según Wikipedia, JFK y HNL
+
+```{r}
+flights %>%
+  arrange(desc(distance))
+```
+
+
+## Ejercicio 5
+
+¿Qué vuelos tienen los trayectos más cortos? Busca en Wikipedia qué dos aeropuertos del dataset alojan los vuelos más largos. 
+
+### Solución
+
+Según Wikipedia, EWR y LGA
+
+```{r}
+flights %>%
+  arrange(distance)
+```
+
+## Ejercicio 6
+
+Dale al coco para pensar cuantas más maneras posibles de seleccionar los campos dep_time, dep_delay, arr_time y arr_delay del dataset de flights.
+
+### Solución
+
+```{r}
+flights %>%
+  select(dep_time, dep_delay, arr_time, arr_delay)
+
+flights %>%
+  select(starts_with("dep"), starts_with("arr"))
+
+flights %>%
+  select(ends_with("delay"), arr_time, dep_time)
+
+flights %>%
+  select(ends_with("delay"), ends_with("time"), -starts_with("sched"), -starts_with("air"))
+```
+
+
+## Ejercicio 7
+
+¿Qué ocurre si pones el nombre de una misma variable varias veces en una select()?
+
+### Solución
+
+```{r}
+flights %>%
+  select(dep_time, dep_time)
+```
+
+No ocurre absolutamente nada, la función devuelve exactamente lo mismo
+
+
+## Ejercicio 8
+
+Investiga el uso de la función one_of() de dplyr.
+
+### Solución
+
+Según la ayuda de R, "Matches variable names in a character vector."
+
+Es decir, si no sabemos exactamente cómo se escribía el nombre de la columna, podemos meter todas las opciones que se nos ocurren en un vector y one_of() aplicado a este vector escogerá las columnas que queríamos (siempre y cuando esté el nombre bien escrito de la columna en el vector).
+
+```{r}
+cols = c("deptime", "dep_time", "d_time", "ar_delay", "arr_delay", "arr.delay")
+
+flights %>%
+  select(one_of(cols))
+```
+
+
+## Ejercicio 9
+
+Investiga cómo puede ser útil la función one_of() de la pregunta anterior en conjunción con el vector de variables 
+
+```{r, eval = F}
+c("year", "month", "day", "dep_delay", "arr_delay")
+```
+
+
+### Solución
+
+```{r}
+c = c("year", "month", "day", "dep_delay", "arr_delay")
+
+flights %>%
+  select(one_of(c))
+```
+
+Pues selecciona todas las columnas que hay en el vector porque todas ellas están bien escritas.
+
+
+## Ejercicio 10
+
+Intenta averiguar el resultado del siguiente código. Luego ejecútalo y a ver si el resultado te sorprende.
+
+```{r, eval = F}
+select(flights, contains("time"))
+```
+
+
+Intenta averiguar cómo lo hacen las funciones de ayuda de la select para tratar el caso por defecto y cómo lo puedes cambiar.
+
+### Solución
+
+Pues de la tibble flights, seleccionamos todas aquellas columnas cuyo nombre contiene time
+
+```{r}
+select(flights, contains("time"))
+```
+
+
+
+
+
+***
+
+# Tarea 10
+
+## Ejercicio 1
+
+El dataset de vuelos tiene dos variables, dep_time y sched_dep_time muy útiles pero difíciles de usar por cómo vienen dadas al no ser variables continuas. Fíjate que cuando pone 559, se refiere a que el vuelo salió a las 5:59... 
+
+Convierte este dato en otro más útil que represente el número de minutos que horas desde media noche. 
+
+### Solución
+
+```{r}
+flights_new <- flights %>%
+  select(
+    dep_time,
+    sched_dep_time
+  )
+
+flights_new %>%
+  mutate(
+    dep_time = dep_time%/%100*60 + dep_time%%100,
+    sched_dep_time = sched_dep_time%/%100*60 + sched_dep_time%%100
+  )
+```
+
+
+## Ejercicio 2
+
+Compara las variables air_time contra arr_time - dep_time. 
+
+¿Qué esperas ver?
+
+¿Qué ves realmente?
+
+¿Se te ocurre algo para mejorarlo y corregirlo?
+
+### Solución
+
+```{r}
+flights_new <- flights %>%
+  select(
+    dep_time,
+    arr_time,
+    air_time
+  )
+
+flights_new %>%
+  mutate(
+    air_time2 = arr_time - dep_time
+  )  
+```
+
+Esperaba ver lo mismo, pero resulta que tanto arr_time como dep_time tienen el formato hhmm, a pesar de ser tratados como números enteros. Hay que realizarles la transformación llevada a cabo en el ejercicio anterior para que lo propuesto en el enunciado tenga sentido.
+
+En la columna air_time veo el tiempo en minutos que el avión duró en el aire mientras que en la columna llamada air_time2, resultado de operar arr_time-dep_time no veo nada, porque no se puede operar aritméticamente con horas tratándolas como números enteros
+
+Lo dicho anteriormente, realizar la transformación llevada a cabo en el ejercicio anterior tanto a la variable dep_time como a la variable arr_time
+
+```{r}
+flights_new %>%
+  mutate(
+    dep_time = dep_time%/%100*60 + dep_time%%100,
+    arr_time = arr_time%/%100*60 + arr_time%%100,
+    air_time2 = arr_time - dep_time
+  )
+```
+
+Siguen sin corresponderse, cosa que puede deberse a un fallo de medición o al tiempo antes del despegue y después del aterrizaje, que puede no ser nada o durar un tiempo considerable
+
+## Ejercicio 3
+
+Compara los valores de dep_time, sched_dep_time y dep_delay. Cómo deberían relacionarse estos tres números? Compruébalo y haz las correcciones numéricas que necesitas.
+
+### Solución
+
+```{r}
+flights_new <- flights %>%
+  select(
+    dep_time,
+    sched_dep_time,
+    dep_delay
+  )
+
+flights_new %>%
+  transmute(
+    dep_time = dep_time%/%100*60 + dep_time%%100,
+    sched_dep_time = sched_dep_time%/%100*60 + sched_dep_time%%100,
+    dep_delay,
+    relation = dep_time-sched_dep_time
+  )
+```
+
+Es decir, tal y como se puede observar, la relación entre estas 3 variables es la siguiente:
+
+dep_time - sched_dep_time = dep_delay
+
+## Ejercicio 4
+
+Usa una de las funciones de ranking para quedarte con los 10 vuelos más retrasados de todos.
+
+### Solución
+
+```{r}
+flights_new <- flights %>% 
+  mutate(r_delay = min_rank(desc(dep_delay))) %>% 
+  arrange(r_delay) %>%
+  filter(r_delay <= 10) %>%
+  select(r_delay, dep_delay, everything())
+```
+
+## Ejercicio 5
+
+Aunque la ejecución te de una advertencia, qué resultado te da la operación
+
+1:6 + 1:20
+
+### Solución
+
+```{r}
+1:6 + 1:20
+```
+
+El resultado es un vector de longitud 20. Si a este vector lo llamamos x, sus entradas son
+
+if i %% 6 == 0:
+x[i] = i + 6
+
+else: 
+x[i] = i + i %% 6
+
+
+## Ejercicio 6
+
+Además de todas las funciones que hemos dicho, las trigonométricas también son funciones vectoriales que podemos usar para hacer transformaciones con mutate. Investiga cuales trae R y cual es la sintaxis de cada una de ellas.
+
+### Solución
+
+Funcionan las funciones sin(), cos() y tan() por lo que he podido observar. He intentado buscarlo mediante la documentación de R, pero no he obtendido nada utilizando esta vía.
+
+
+
+
+
+***
+
+# Tarea 11
+
+## Ejercicio 1
+
+Intenta describir con frases entendibles el conjunto de vuelos retrasados. Intenta dar afirmaciones como por ejemplo:
+
+- Un vuelo tiende a salir unos 20 minutos antes el 50% de las veces y a salir tarde el 50% de las veces restantes.
+
+- Los vuelos de la compañía XX llegan siempre 20 minutos tarde
+
+- El 95% de los vuelos a HNL llegan a tiempo, pero el 5% restante se retrasan más de 3 horas.
+
+Intenta dar por lo menos 5 afirmaciones verídicas en base a los datos que tenemos disponibles.
+
+### Solución
+
+El conjunto de los vuelos retrasados lo forman los vuelos que tienen retraso en la salida o en la llegada:
+
+```{r}
+flights_delay <- flights %>%
+  filter(dep_delay > 0,
+         arr_delay > 0)
+```
+
+```{r}
+flights_delay %>%
+  summarise(median = median(dep_delay, na.rm = T))
+```
+
+- Un vuelo retrasado tiende a salir hasta 32 minutos tarde el 50% de las veces y más de 32 minutos tarde el 50%
+
+```{r}
+flights_delay %>%
+  select(carrier, dep_delay, arr_delay) %>%
+  group_by(carrier) %>%
+  summarise(
+    first = min(arr_delay, na.rm = T),
+    q1 = quantile(arr_delay, 0.25, na.rm = T), #Primer cuartil
+    median = quantile(arr_delay, 0.5, na.rm = T),
+    q3 = quantile(arr_delay, 0.75, na.rm = T), #Tercer cuartil
+    last = max(arr_delay, na.rm = T)
+  )
+```
+
+- El 25% de los vuelos retrasados de la compañía HA llegan como mucho 14 minutos más tarde de lo previsto.
+
+```{r}
+flights_delay %>%
+  select(carrier, dep_delay, arr_delay) %>%
+  group_by(carrier) %>%
+  summarise(
+    first = min(dep_delay, na.rm = T),
+    q1 = quantile(dep_delay, 0.25, na.rm = T), #Primer cuartil
+    median = quantile(dep_delay, 0.5, na.rm = T),
+    q3 = quantile(dep_delay, 0.75, na.rm = T), #Tercer cuartil
+    last = max(dep_delay, na.rm = T)
+  )
+```
+
+- El 75% de los vuelos de la compañía 9E salen como muy tarde 86 minutos después de la hora de salida establecida.
+
+
+## Ejercicio 2
+
+Da una versión equivalente a las pipes siguientes sin usar la función count:
+
+not_cancelled %>% count(dest)
+
+not_cancelled %>% count(tailnum, wt = distance)
+
+### Solución
+
+```{r}
+not_cancelled <- flights %>% 
+  filter(!is.na(dep_delay), !is.na(arr_delay))
+
+not_cancelled %>% count(dest)
+
+not_cancelled %>% 
+  group_by(dest) %>% 
+  tally()
+
+not_cancelled %>% 
+  group_by(dest) %>% 
+  summarise(
+    count = n()
+  )
+
+not_cancelled %>% count(tailnum, wt = distance)
+
+not_cancelled %>% 
+  group_by(tailnum) %>%
+  tally(wt = distance)
+
+not_cancelled %>% 
+  group_by(tailnum) %>%
+  summarise(
+    dist = sum(distance)
+  )
+```
+
+
+## Ejercicio 3
+
+Para definir un vuelo cancelado hemos usado la función
+
+(is.na(dep_delay) | is.na(arr_delay))
+
+Intenta dar una definición que sea mejor, ya que la nuestra es un poco subóptima. ¿Cuál es la columna más importante?
+
+### Solución
+
+```{r}
+cancelled <- flights %>% 
+  filter(is.na(dep_delay) | is.na(arr_delay))
+
+cancelled <- flights %>%
+  filter(is.na(air_time))
+```
+
+La variable más importante, de no haber habido vuelo, es `air_time`
+
+
+## Ejercicio 4
+
+Investiga si existe algún patrón del número de vuelos que se cancelan cada día.
+
+Investiga si la proporción de vuelos cancelados está relacionada con el retraso promedio por día en los vuelos.
+
+Investiga si la proporción de vuelos cancelados está relacionada con el retraso promedio por aeropuerto en los vuelos.
+
+¿Qué compañía aérea sufre los peores retrasos?
+
+### Solución
+
+```{r}
+# Patrón entre vuelos que se cancelan cada día
+flights %>%
+  filter(is.na(air_time)) %>% 
+  group_by(day) %>% 
+  count() %>% 
+  ggplot(aes(x = day, y = n)) +
+  geom_point() +
+  geom_smooth()
+```
+
+Suele haber más vuelos cancelados la primera mitad del mes
+
+```{r}
+# proporción de vuelos cancelados está relacionada con el retraso promedio por día en los vuelos?
+
+flights %>% 
+  mutate(cancelled = is.na(air_time),
+         not_cancelled = !cancelled) %>%
+  group_by(day) %>%
+  summarise(percent_cancelled = sum(cancelled)/n()*100,
+            mean_delay = mean(dep_delay, na.rm = T)) -> aux
+aux %>%
+  ggplot(aes(mean_delay, percent_cancelled, size = day, col = day, alpha = day)) +
+  geom_point() +
+  geom_smooth()
+```
+
+```{r}
+# proporción de vuelos cancelados está relacionada con el retraso promedio por origen en los vuelos?
+flights %>% 
+  mutate(cancelled = is.na(air_time),
+         not_cancelled = !cancelled) %>%
+  group_by(origin) %>%
+  summarise(percent_cancelled = sum(cancelled)/n()*100,
+            mean_delay = mean(dep_delay, na.rm = T)) -> aux
+aux %>%
+  ggplot(aes(mean_delay, percent_cancelled, col = origin)) +
+  geom_point()
+```
+
+```{r}
+# Compañía que sufre peores retrasos
+
+flights %>%
+  arrange(desc(dep_delay))
+```
+
+La compañía HA
+
+
+## Ejercicio 5
+
+Difícil: Intenta desentrañar los efectos que producen los retrasos por culpa de malos aeropuertos vs malas compañías aéreas. Por ejemplo, intenta usar 
+
+flights %>% group_by(carrier, dest) %>% summarise(n())
+
+### Solución
+
+```{r}
+flights %>% 
+  group_by(carrier, dest) %>% 
+  summarise(n())
+```
+
+## Ejercicio 6
+
+¿Qué hace el parámetro sort como argumento de count()? ¿Cuando puede sernos útil?
+
+Vuelve a la lista de funciones útiles para filtrar y mutar y describe cómo cada operación cambia cuando la juntamos con un group_by.
+
+### Solución
+
+```{r}
+flights %>%
+  count(dest, sort = T)
+```
+
+Los ordena de mayor a menor.
+
+```{r}
+flights %>%
+  group_by(origin, dest) %>%
+  filter(dep_delay > 0)
+
+flights %>%
+  filter(dep_delay > 0)
+```
+
+No observo ningún cambio...
+
+## Ejercicio 7
+
+Vamos a por los peores aviones. Investiga el top 10 de qué aviones (número de cola y compañía) llegaron más tarde a su destino.
+
+### Solución
+
+```{r}
+flights %>%
+  group_by(tailnum, carrier) %>%
+  arrange(desc(arr_delay)) -> worst
+worst[1:10,]
+```
+
+
+## Ejercicio 8
+
+Queremos saber qué hora del día nos conviene volar si queremos evitar los retrasos en la salida.
+
+Difícil: Queremos saber qué día de la semana nos conviene volar si queremos evitar los retrasos en la salida.
+
+### Solución
+
+```{r}
+flights %>%
+  filter(!is.na(dep_delay),
+         dep_delay>0) %>%
+  group_by(hour) %>%
+  summarise(
+    mean = mean(dep_delay),
+    sd = sd(dep_delay),
+    IQR = IQR(dep_delay),
+    min = min(dep_delay),
+    Q0.25 = quantile(dep_delay, 0.25),
+    median = median(dep_delay),
+    Q0.75 = quantile(dep_delay, 0.75)
+  )
+```
+
+
+## Ejercicio 9
+
+Para cada destino, calcula el total de minutos de retraso acumulado.
+
+Para cada uno de ellos, calcula la proporción del total de retraso para dicho destino.
+
+### Solución
+
+```{r}
+flights %>%
+  filter(dep_delay>0, !is.na(dep_delay)) %>%
+  group_by(dest) %>%
+  summarise(
+    total_dep_delay = sum(dep_delay)
+  ) %>%
+  mutate(prop_delay = total_dep_delay/sum(total_dep_delay)) %>%
+  arrange(total_dep_delay)
+```
+
+
+## Ejercicio 10
+
+Los retrasos suelen estar correlacionados con el tiempo. Aunque el problema que ha causado el primer retraso de un avión se resuelva, el resto de vuelos se retrasan para que salgan primero los aviones que debían haber partido antes. Intenta usar la función lag() explora cómo el retraso de un avión se relaciona con el retraso del avión inmediatamente anterior o posterior.
+
+### Solución
+
+Seleccionaremos las salidas de JFK y los retrasos en la salida. Necesitamos ordenar los vuelos por salida
+
+```{r}
+flights %>% 
+  filter(origin == "JFK") %>% 
+  transmute(origin, time_hour, dep_delay) %>% 
+  arrange(time_hour) -> flights_time_order 
+lapply(1:10,function(x) cor(flights_time_order$dep_delay,lag(flights_time_order$dep_delay,x), use  = "complete")) -> correlation_delay_lag
+correlation_delay_lag <- unlist(correlation_delay_lag) 
+names(correlation_delay_lag) <- paste("lag",1:10,sep="_")
+correlation_delay_lag
+```
+
+
+## Ejercicio 11
+
+Vamos a por los destinos esta vez. Localiza vuelos que llegaron 'demasiado rápido' a sus destinos. Seguramente, el becario se equivocó al introducir el tiempo de vuelo y se trate de un error en los datos. Calcula para ello el cociente entre el tiempo en el aire de cada vuelo relativo al tiempo de vuelo del avión que tardó menos en llegar a dicho destino. ¿Qué vuelos fueron los que más se retrasaron en el aire?
+
+### Solución
+
+```{r}
+flights %>%
+  filter(!is.na(air_time)) %>%
+  arrange(arr_delay)
+
+# Los primeros 10 mostrados son los vuelos que llegaron con más antelación a sus destinos
+library(lubridate)
+flights %>%
+  filter(!is.na(air_time)) %>%
+  select(air_time, dep_time, arr_time) %>%
+  mutate(
+    dep_time_min = dep_time%/%100*60 + dep_time%%100,
+    arr_time_min = arr_time%/%100*60 + arr_time%%100,
+    diff = ifelse(arr_time_min-dep_time_min >= 0, arr_time_min - dep_time_min, 
+                  arr_time_min + 1440 - dep_time_min),
+    cociente = air_time/diff) %>%
+  arrange(cociente)
+```
+
+
+## Ejercicio 12
+
+Encuentra todos los destinos a los que vuelan dos o más compañías y para cada uno de ellos, crea un ranking de las mejores compañías para volar a cada destino (utiliza el criterio que consideres más conveniente como probabilidad de retraso, velocidad o tiempo de vuelo, número de vuelos al año..)
+
+Finalmente, para cada avión (basándonos en el número de cola) cuenta el número de vuelos que hace antes de sufrir su primer retraso de más de una hora. Valora entonces la fiabilidad del avión o de la compañía aérea asociada al mismo.
+
+### Solución
+
+```{r}
+flights %>%
+  group_by(dest) %>%
+  summarise(
+    carriers = n_distinct(carrier)
+  ) %>%
+  filter(carriers >= 2) -> best_dest
+
+flights %>%
+  filter(dest %in% best_dest$dest,
+         !is.na(air_time)) %>%
+  select(dest, carrier, air_time) %>%
+  group_by(dest, carrier) %>% 
+  summarise(mean = mean(air_time)) %>%
+  arrange(dest, mean) %>%
+  mutate(order = row_number())
+
+
+flights %>%
+  filter(!is.na(dep_delay)) %>%
+  arrange(year, month, day) %>%
+  group_by(tailnum) %>%
+  summarise(
+    n_hasta = sum(cumany(dep_delay > 60) == FALSE)
+  ) %>%
+  arrange(tailnum)
+
+flights %>%
+  select(year, month, day, tailnum, dep_delay) %>%
+  arrange(tailnum, year, month, day)
+```
+

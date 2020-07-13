@@ -1,0 +1,4 @@
+"0","# themes que me gustan: cerulean, flatly, cosmo"
+"0","knitr::opts_chunk$set(echo = TRUE, comment = NA, cache = T)"
+"0","library(tidyverse)"
+"0","library(nycflights13)"
